@@ -1,0 +1,104 @@
+import flet as ft
+
+
+class TodoApp(ft.UserControl):
+    def build(self):
+        self.new_task = ft.TextField(hint_text="yaz..", expand=True)
+        self.tasks = ft.Column()
+        
+        self.data=0 # ! her eklenen liste ve tuşlarına sayısal değer atıyoz
+
+        return (
+            ft.Column(
+            width=600,
+            controls=[
+                #1
+                ft.Row(
+                    controls=[
+                        self.new_task,
+                        ft.FloatingActionButton(icon=ft.icons.ADD,on_click=self.add_clicked),# ,on_click=self.add_clicked
+                        ft.FloatingActionButton(icon="highlight_off",bgcolor="#D55E27",on_click=self.deleteall) # on_click=self.deleteall
+                    ],
+                ),
+                #2
+                self.tasks,
+                #3
+  
+            ],
+        )
+        )
+
+    def add_clicked(self, e):
+        self.edt=ft.IconButton(icon=ft.icons.CREATE_OUTLINED,tooltip="Edit To-Do",data=self.data, on_click=self.edit) #, on_click=self.edit
+        self.dlt=ft.IconButton(icon=ft.icons.DELETE_OUTLINE,tooltip="Delete To-Do",data=self.data,on_click=self.delete) # ,on_click=self.delete
+
+        self.lt=ft.ListTile( leading=self.edt,
+                            title=ft.Text(self.new_task.value),
+                            trailing= self.dlt,
+                             data=self.data ) 
+        
+       
+        self.tasks.controls.append(self.lt)
+        self.tasks.update()
+        self.data=self.data+1
+        print("liste data:",self.lt.data) #data atadık hep 1 artcak /self.lt data değeri 
+        self.new_task.value = "" #yeniden bos yapıyoruz yenı değerler alması için
+        self.update()
+
+    def deleteall(self,e):
+        for task in self.tasks.controls[:]:
+            self.tasks.controls.remove(task)
+            self.update()
+
+    def delete(self,e):
+       dt=e.control.data #tuşa row ile aynı id ekledim tıklanan tuşun bulunduug row etkilencek
+       #print(dt)
+       for task in self.tasks.controls[:]:
+            if task.data==dt:
+                self.tasks.controls.remove(task)
+                self.update() #user controldekı seylerı günceller değişimde vb.
+
+    # güncelleme
+    def kapat(self,e):
+        self.msj.open=False
+        self.update()
+
+    def save(self,e):
+        dt=e.control.data
+        for task in self.tasks.controls[:]:
+            if task.data==self.dzt:
+                task.title=ft.Text(self.gncl.value)
+                self.update()
+        print("save:",dt)
+        
+    
+    def edit(self,e):
+        self.dzt=e.control.data
+
+        self.gncl = ft.TextField(hint_text="yeni değer yaz", expand=True) #mesaj kutusundakı textfield
+        self.msj=ft.AlertDialog(open=False, modal=True,title=ft.Text("Please confirm"),
+                                actions=[ft.TextButton("kaydet",on_click=self.save,data=self.dzt), ft.TextButton("kapat",on_click=self.kapat)], content=self.gncl)
+        
+    
+        self.tasks.controls.append( self.msj ) #columna eklekı def mainde yapabılcegın ıslemleri yapabil
+        self.msj.open=True
+
+        self.update()
+
+
+
+def main(page: ft.Page):
+    page.title = "ToDo App"
+    page.window_width=600
+    page.window_height=700
+    
+    
+    
+    page.add(TodoApp())
+    page.add()
+
+    page.update()
+
+    
+
+ft.app(target=main)
